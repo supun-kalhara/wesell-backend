@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const app = express();
 require('dotenv').config();
 
+// const itemRoute = require('./routes/item.route.js')
+const userRoute = require('./routes/user.route.js')
+
 //Env Constants
 const port = process.env.PORT || 8000;
 const uri = process.env.URI;
@@ -16,7 +19,8 @@ mongoose.connect(uri)
 .catch( (error) =>  { console.log(" DB connection unsuccesful " , error) });
 
 // Routes
-app.use('/api/items', productRoute)
+// app.use('/api/items', itemRoute)
+app.use('/user', userRoute)
 
 app.listen(port, () => {
     console.log(`Running on port : ${port}`);
