@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { Role } = require('./constants.js') 
 
 const UserSchema = mongoose.Schema(
     {
@@ -8,6 +9,13 @@ const UserSchema = mongoose.Schema(
             unique: true,
             trim: true,
             lowercase: true,
+        },
+
+        role: {
+            type: String,
+            enum: [ Role.ADMIN, Role.SUPERUSER, Role.BASIC],
+            required: true,
+            default: Role.BASIC,
         },
 
         email: {
@@ -35,7 +43,7 @@ const UserSchema = mongoose.Schema(
         }],
 
         drafts: {
-            type: String
+            type: [{}]
         },
 
         isDarkTheme: {
