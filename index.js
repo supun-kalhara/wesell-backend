@@ -5,6 +5,7 @@ require('dotenv').config();
 
 // const itemRoute = require('./routes/item.route.js')
 const userRoute = require('./routes/user.route.js')
+const itemRoute = require('./routes/item.route.js')
 
 //Env Constants
 const port = process.env.PORT || 8000;
@@ -19,7 +20,7 @@ mongoose.connect(uri)
 .catch( (error) =>  { console.log(" DB connection unsuccesful " , error) });
 
 // Routes
-// app.use('/api/items', itemRoute)
+app.use('/item', itemRoute)
 app.use('/user', userRoute)
 
 app.listen(port, () => {

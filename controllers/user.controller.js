@@ -1,9 +1,14 @@
 const User = require('../models/user.model.js');
-
+const bcrypt = require('bcrypt');
 //Register User
 const registerUser = async (req, res) => {
     try{
-        const user = await User.create(req.body);
+        // Generate Hashed Password
+        const hashedPassword = await bcrypt.hash(req.body.password, 10)
+        // Create user with Hashed Password
+        var data = req.body
+        data.password = hashedPassword
+        const user = await User.create(data);
         res.status(200).json(user);
     }catch(error){
         res.status(500).json({message: error.message});
@@ -13,27 +18,27 @@ const registerUser = async (req, res) => {
 //Login User
 const loginUser = async (req, res) => {
     try{
-        var email = req.body.email;
-        var username = req.body.username;
-        var password = req.body.password;
+        var data = {};
+        const password = req.body.password;
+        // Set email or username
         if(req.body.email){
-            data = {
-                email: email,
-                password: password
-            }
+            data.email = req.body.email;
         }
         if(req.body.username){
-            data = {
-                username: username,
-                password: password
-            }
+            data.username = req.body.username;
         }
         const user = await User.findOne(data);
+        // Wrong email/username
         if(!user){
-            res.status(404).json({message: "User not Found"});
-        } else{
+            return res.status(404).json({message: "Wrong username or password"});
+        } 
+        // Compare passwords
+        if(await bcrypt.compare(password, user.password)){
             res.status(200).json(user);
+        } else{ //Wrong password
+            res.status(401).json({message: "Wrong username or password"});
         }
+        
     }catch(error){
         res.status(500).json({message: error.message});
     }

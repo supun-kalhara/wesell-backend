@@ -1,13 +1,12 @@
 const express = require('express');
 const router = express.Router();
-// const { getProducts, getProduct, createProduct, updateProduct, deleteProduct } =   require('../controllers/gift.controller.js')
-// const { } =   require('../controllers/')
+const { createItem } =   require('../controllers/item.controller')
 
 // router.get('/', getProducts);
 
 // router.get('/:id', getProduct);
 
-// router.post('/', createProduct);
+router.post('/', createItem);
 
 // router.put('/:id', updateProduct);
 
