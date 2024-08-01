@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { authenticateToken } = require('../authentication') 
 const { 
     registerUser, 
     loginUser, 
@@ -10,6 +11,7 @@ const {
     deleteUserByEmail,
     updateUserById,
 } =   require('../controllers/user.controller')
+
 
 // Login
 router.get('/login', loginUser);
@@ -24,7 +26,7 @@ router.get('/email/:email', getUserByEmail);
 router.get('/username/:username', getUserByUsername);
 
 // Get All Users
-router.get('/', getAllUsers);
+router.get('/', authenticateToken, getAllUsers);
 
 // Register
 router.post('/register', registerUser);
