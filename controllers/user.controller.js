@@ -5,15 +5,23 @@ const jwt = require('jsonwebtoken');
 //Register User
 const registerUser = async (req, res) => {
     try{
+        const findUserEmail = await User.findOne({email: req.body.email});
+        if(findUserEmail){
+            return res.status(400).json({message: "user with this email already exists"});
+        }
+        const findUserUsername = await User.findOne({username: req.body.username});
+        if(findUserUsername){
+            return res.status(400).json({message: "user with this username already exists"});
+        }
         // Generate Hashed Password
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
         // Create user with Hashed Password
         var data = req.body
         data.password = hashedPassword
         const user = await User.create(data);
-        res.status(200).json(user);
+        return res.status(200).json(user);
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -32,18 +40,23 @@ const loginUser = async (req, res) => {
         const user = await User.findOne(data);
         // Wrong email/username
         if(!user){
-            return res.status(404).json({message: "Wrong username or password"});
-        } 
+            return res.status(404).json({message: "Wrong username/email or password"});
+        }
+
         // Compare passwords
         if(await bcrypt.compare(password, user.password)){
-            const accessToken = jwt.sign(user.toJSON(), process.env.ACCESS_TOKEN_SECRET)
-            res.status(200).json( {accessToken: accessToken} );
+            var resUser = user.toJSON();
+            delete resUser.password
+            const accessToken = jwt.sign(resUser, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '7d' // expires in 365 days
+            })
+            return res.status(200).json( {accessToken: accessToken} );
         } else{ //Wrong password
-            res.status(401).json({message: "Wrong username or password"});
+            return res.status(401).json({message: "Wrong username/email or password"});
         }
         
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -52,9 +65,9 @@ const getUserById = async (req, res) => {
     try{
         const { id } = req.params;
         const user = await User.findById(id);
-        res.status(200).json(user);
+        return res.status(200).json(user);
     }catch(error){
-        res.status(500).json({message: "User not Found"});
+        return res.status(500).json({message: "User not Found"});
     }
 }
 
@@ -62,9 +75,9 @@ const getUserById = async (req, res) => {
 const getAllUsers = async (req, res) => {
     try{
         const users = await User.find({});
-        res.status(200).json(users);
+        return res.status(200).json(users);
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -74,12 +87,12 @@ const getUserByEmail = async (req, res) => {
         const { email } = req.params;
         const user = await User.find({email : email});
         if(!user.length){
-            res.status(404).json({message: "User not Found"});
+            return res.status(404).json({message: "User not Found"});
         } else{
-            res.status(200).json(user);
+            return res.status(200).json(user);
         }
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -89,12 +102,12 @@ const getUserByUsername = async (req, res) => {
         const { username } = req.params;
         const user = await User.find({username: username});
         if(!user.length){
-            res.status(404).json({message: "User not Found"});
+            return res.status(404).json({message: "User not Found"});
         } else{
-            res.status(200).json(user);
+            return res.status(200).json(user);
         }
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -105,12 +118,12 @@ const deleteUserByEmail = async (req, res) => {
         const user = await User.deleteOne({ email: email });
 
         if(user.deletedCount == 0){
-            res.status(404).json({message: "User not Found"});
+            return res.status(404).json({message: "User not Found"});
         }else{
-            res.status(200).json({message: "Successfully deleted user"});
+            return res.status(200).json({message: "Successfully deleted user"});
         }
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -123,9 +136,9 @@ const updateUserById = async(req, res) => {
             return res.status(404).json({message: "User not Found"});
         };
         const updatedUser = await User.findById(id);
-        res.status(200).json(updatedUser);
+        return res.status(200).json(updatedUser);
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 

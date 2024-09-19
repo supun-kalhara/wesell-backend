@@ -1,4 +1,40 @@
 const Item = require('../models/item.model.js');
+require('dotenv').config()
+const { S3Client, PutObjectCommand } =  require('@aws-sdk/client-s3');
+const crypto = require('crypto')
+
+const s3 = new S3Client({ 
+    credentials: {
+        accessKeyId: process.env.ACCESS_KEY,
+        secretAccessKey: process.env.SECRET_ACCESS_KEY,
+    },
+    region: process.env.BUCKET_REGION
+});
+
+const randomImageName = (bytes = 32) => {
+    crypto.randomBytes(bytes).toString('hex')
+}
+
+// Upload Photo
+const uploadPhoto = async (req, res) => {
+    try{
+        console.log("req", req.file);
+        console.log("bucket", process.env.BUCKET_NAME)
+        imageName = req.file.originalname + randomImageName()
+        const params = {
+            Bucket: process.env.BUCKET_NAME,
+            Key: imageName,
+            Body: req.file.buffer,
+            ContentType: req.file.mimetype,
+        }
+        const command = new PutObjectCommand(params)
+        await s3.send(command)
+        // Return name of file and uri here
+        return res.status(200).json({data: req.file})
+    }catch(error){
+        return res.status(500).json({message: error.message});
+    }
+}
 
 // Create new Item
 const createItem = async (req, res) => {
@@ -115,4 +151,5 @@ module.exports = {
     updateItemById,
     deleteItemById,
     getItemsRange,
+    uploadPhoto,
 }
