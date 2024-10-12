@@ -12,16 +12,24 @@ const PostType = {
 }
 
 const Condition = {
-    BRAND_NEW: "brand new",
-    LIKE_NEW: "like new",
+    BRAND_NEW: "brandNew",
+    LIKE_NEW: "likeNew",
     EXCELLENT: "excellent",
     GOOD: "good",
     OK: "okay",
     OLD: "old"
 }
 
+const ReportType = {
+    FRAUD: "fraud",
+    SPAM: "spam",
+    FALSE_ADVERTISING: "falseAdvertising",
+    OFFENSIVE: "offensive"
+}
+
 module.exports = {
-    Role: Role,
-    PostType: PostType,
-    Condition: Condition
+    Role,
+    PostType,
+    Condition,
+    ReportType,
 }

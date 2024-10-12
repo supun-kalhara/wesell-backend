@@ -1,4 +1,6 @@
 const Item = require('../models/item.model.js');
+const Report = require('../models/report.model.js');
+
 require('dotenv').config()
 const { S3Client, PutObjectCommand } =  require('@aws-sdk/client-s3');
 const crypto = require('crypto')
@@ -12,25 +14,23 @@ const s3 = new S3Client({
 });
 
 const randomImageName = (bytes = 32) => {
-    crypto.randomBytes(bytes).toString('hex')
+    return crypto.randomBytes(bytes).toString('hex')
 }
 
 // Upload Photo
 const uploadPhoto = async (req, res) => {
     try{
-        console.log("req", req.file);
-        console.log("bucket", process.env.BUCKET_NAME)
-        imageName = req.file.originalname + randomImageName()
+        const imageName = req.file.originalname + randomImageName();
         const params = {
             Bucket: process.env.BUCKET_NAME,
             Key: imageName,
             Body: req.file.buffer,
             ContentType: req.file.mimetype,
-        }
-        const command = new PutObjectCommand(params)
-        await s3.send(command)
+        };
+        const command = new PutObjectCommand(params);
+        s3Res = await s3.send(command);
         // Return name of file and uri here
-        return res.status(200).json({data: req.file})
+        return res.status(200).json({ imageName });
     }catch(error){
         return res.status(500).json({message: error.message});
     }
@@ -41,6 +41,26 @@ const createItem = async (req, res) => {
     try{
         const item = await Item.create(req.body);
         res.status(200).json(item);
+    }catch(error){
+        res.status(500).json({message: error.message});
+    }
+}
+
+// Create new Report
+const createReport = async (req, res) => {
+    try{
+        const report = await Report.create(req.body);
+        res.status(200).json(report);
+    }catch(error){
+        res.status(500).json({message: error.message});
+    }
+}
+
+// Get All Reports
+const getAllReports = async (req, res) => {
+    try{
+        const result = await Report.find({});
+        res.status(200).json(result);
     }catch(error){
         res.status(500).json({message: error.message});
     }
@@ -123,6 +143,23 @@ const updateItemById = async(req, res) => {
     }
 }
 
+// Update Views
+const updateViews = async(req, res) => {
+    try{
+        const { id } = req.params;
+        const item = await Item.findById(id);
+        if (!item) {
+            return res.status(404).json({message: "Item not Found"});
+        };
+        item.views += 1
+        await Item.findByIdAndUpdate(id, item );
+        
+        res.status(200).json(item.views);
+    }catch(error){
+        res.status(500).json({message: error.message});
+    }
+}
+
 // Delete Item by Id
 const deleteItemById = async (req, res) => {
     try{
@@ -144,6 +181,7 @@ const deleteItemById = async (req, res) => {
 
 module.exports = {
     createItem,
+    createReport,
     getItemById,
     getAllItems,
     getItemsByType,
@@ -152,4 +190,6 @@ module.exports = {
     deleteItemById,
     getItemsRange,
     uploadPhoto,
+    updateViews,
+    getAllReports,
 }

@@ -26,7 +26,7 @@ router.get('/email/:email', getUserByEmail);
 router.get('/username/:username', getUserByUsername);
 
 // Get All Users
-router.get('/', authenticateToken, getAllUsers);
+// router.get('/', authenticateToken, getAllUsers);
 
 // Register
 router.post('/register', registerUser);

@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 const { PostType, Condition } = require('./constants.js') 
+const moment = require('moment')
+
+// Set expiry date to 3 months from now
+const expiryDate = (moment().add(3, 'months')).toISOString();
 
 const itemSchema = new mongoose.Schema(
     {
@@ -20,16 +24,22 @@ const itemSchema = new mongoose.Schema(
             required: true,
         },
 
-        user: [{
+        user: {
             type:mongoose.Schema.Types.ObjectId, 
             ref: 'User',
             required: true,
-        }],
+        },
 
         expire: {
-            type: Number,
-            default: 3,
+            type: String,
+            default: expiryDate,
             required: true,
+        },
+
+        views:{
+            required: true,
+            default: 0,
+            type: Number,
         },
 
         location: {
@@ -37,7 +47,11 @@ const itemSchema = new mongoose.Schema(
             required: true,
         },
 
-
+        city: {
+            type: String,
+            required: true,
+        },
+        
         // Unique fields
         images: {
             type: [String],
@@ -58,17 +72,17 @@ const itemSchema = new mongoose.Schema(
                 Condition.OLD],
         },
 
-        mainCategory: {
+        category: {
             type: String,
         },
 
-        subCategory: {
-            type: String,
-        },
+        // subCategory: {
+        //     type: String,
+        // },
 
-        mileage: {
-            type: Number,
-        },
+        // mileage: {
+        //     type: Number,
+        // },
 
         brand: {
             type: String,
@@ -90,11 +104,15 @@ const itemSchema = new mongoose.Schema(
             type: Number,
         },
 
+        propertyArea: {
+            type: Number,
+        },
+
         jobTitle: {
             type: String,
         },
         
-        pay: {
+        salary: {
             type: Number,
         },
     },

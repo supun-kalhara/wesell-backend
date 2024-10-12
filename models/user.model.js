@@ -34,11 +34,11 @@ const UserSchema = mongoose.Schema(
         },
 
         favourites: [{
-            type: mongoose.Schema.Types.ObjectId, ref: 'Post'
+            type: mongoose.Schema.Types.ObjectId, ref: 'Item'
         }],
 
         posts: [{
-            type: mongoose.Schema.Types.ObjectId, ref: 'Post'
+            type: mongoose.Schema.Types.ObjectId, ref: 'Item'
         }],
 
         drafts: {

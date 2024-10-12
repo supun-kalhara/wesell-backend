@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const { maxFileSize } = require('./constants.js')
 
 const { 
     createItem, 
+    createReport,
     getItemById, 
     getAllItems, 
     getItemsByType, 
@@ -11,12 +13,14 @@ const {
     getItemsByCondition, 
     deleteItemById, 
     getItemsRange, 
-    uploadPhoto
+    uploadPhoto,
+    updateViews,
+    getAllReports
 } =   require('../controllers/item.controller')
 
 
 const storage = multer.memoryStorage()
-const upload = multer({ storage: storage })
+const upload = multer({ storage, limits: { fileSize: maxFileSize * 1000000 /* bytes */ } })
 
 router.post('/upload', upload.single('file'), uploadPhoto);
 
@@ -31,6 +35,12 @@ router.get('/condition/:condition', getItemsByCondition);
 router.get('/range/:limit/:skip', getItemsRange);
 
 router.post('/', createItem);
+
+router.post('/report', createReport);
+
+router.get('/report/all', getAllReports);
+
+router.post('/views/:id', updateViews);
 
 router.put('/:id', updateItemById);
 

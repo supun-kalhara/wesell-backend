@@ -65,7 +65,9 @@ const getUserById = async (req, res) => {
     try{
         const { id } = req.params;
         const user = await User.findById(id);
-        return res.status(200).json(user);
+        resUser = user.toJSON()
+        delete resUser.password
+        return res.status(200).json(resUser);
     }catch(error){
         return res.status(500).json({message: "User not Found"});
     }
@@ -128,7 +130,7 @@ const deleteUserByEmail = async (req, res) => {
 }
 
 // Update User by Id
-const updateUserById = async(req, res) => {
+const updateUserById = async (req, res) => {
     try{
         const { id } = req.params;
         const user = await User.findByIdAndUpdate(id, req.body);
