@@ -162,6 +162,26 @@ const savePost = async(req, res) => {
     }
 }
 
+// unSave Post
+const unSavePost = async(req, res) => {
+    try{
+        const user = await User.findById(req.body.userId);
+        if (!user) {
+            return res.status(404).json({message: "User not Found"});
+        };
+        const index = user.favourites.indexOf(req.body.postId);
+        if (index == -1) {
+            return res.status(400).json({message:"Post not found"});
+        }
+        user.favourites.splice(index, 1);
+        await User.findByIdAndUpdate(req.body.userId, user );
+        return res.status(200).json(user.favourites);
+    }catch(error){
+        return res.status(500).json({message: error.message});
+    }
+}
+
+
 module.exports = {
     registerUser,
     loginUser,
@@ -171,5 +191,6 @@ module.exports = {
     getUserByUsername,
     deleteUserByEmail,
     updateUserById,
-    savePost
+    savePost,
+    unSavePost,
 }

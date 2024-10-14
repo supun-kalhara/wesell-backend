@@ -11,6 +11,7 @@ const {
     deleteUserByEmail,
     updateUserById,
     savePost,
+    unSavePost,
 } =   require('../controllers/user.controller')
 
 
@@ -34,6 +35,9 @@ router.post('/register', registerUser);
 
 // Save post
 router.post('/save', savePost);
+
+// unSave post
+router.post('/unSave', unSavePost);
 
 // Update
 router.put('/:id', updateUserById);

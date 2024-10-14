@@ -171,10 +171,8 @@ const updateViews = async(req, res) => {
 const deleteItemById = async (req, res) => {
     try{
         const { id } = req.params;
-        console.log("id", id)
         const item = await Item.findByIdAndDelete(id);
         console.log("item", item)
-
 
         if(item.deletedCount == 0){
             return res.status(404).json({message: "Item not Found"});
