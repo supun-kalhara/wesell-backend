@@ -40,9 +40,9 @@ const uploadPhoto = async (req, res) => {
 const createItem = async (req, res) => {
     try{
         const item = await Item.create(req.body);
-        res.status(200).json(item);
+        return res.status(200).json(item);
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -50,9 +50,9 @@ const createItem = async (req, res) => {
 const createReport = async (req, res) => {
     try{
         const report = await Report.create(req.body);
-        res.status(200).json(report);
+        return res.status(200).json(report);
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -60,9 +60,9 @@ const createReport = async (req, res) => {
 const getAllReports = async (req, res) => {
     try{
         const result = await Report.find({});
-        res.status(200).json(result);
+        return res.status(200).json(result);
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -70,10 +70,17 @@ const getAllReports = async (req, res) => {
 const getItemById = async (req, res) => {
     try{
         const { id } = req.params;
-        const item = await Item.findById(id);
-        res.status(200).json(item);
+        // Yes, it's a valid ObjectId
+        if (id.match(/^[0-9a-fA-F]{24}$/)) {
+            const item = await Item.findById(id);
+            if(!item){
+                return res.status(404).json({message: "Item not Found"});
+            }
+            return res.status(200).json(item);
+        }
+        return res.status(400).json({message: "Invalid Item Id"});
     }catch(error){
-        res.status(500).json({message: "Item not Found"});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -81,9 +88,9 @@ const getItemById = async (req, res) => {
 const getAllItems = async (req, res) => {
     try{
         const items = await Item.find({});
-        res.status(200).json(items);
+        return res.status(200).json(items);
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -92,9 +99,9 @@ const getItemsRange = async (req, res) => {
     try{
         const { skip, limit } = req.params;
         const items = await Item.find({}).limit(limit).skip(skip);
-        res.status(200).json(items);
+        return res.status(200).json(items);
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -104,12 +111,12 @@ const getItemsByType = async (req, res) => {
         const { type } = req.params;
         const items = await Item.find({type : type});
         if(!items.length){
-            res.status(404).json({message: `No Items of Type:${type} Found`});
+            return res.status(404).json({message: `No Items of Type:${type} Found`});
         } else{
-            res.status(200).json(items);
+            return res.status(200).json(items);
         }
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -119,12 +126,12 @@ const getItemsByCondition = async (req, res) => {
         const { condition } = req.params;
         const items = await Item.find({condition : condition});
         if(!items.length){
-            res.status(404).json({message: `No Items of Condition:${condition} Found`});
+            return res.status(404).json({message: `No Items of Condition:${condition} Found`});
         } else{
-            res.status(200).json(items);
+            return res.status(200).json(items);
         }
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -137,9 +144,9 @@ const updateItemById = async(req, res) => {
             return res.status(404).json({message: "Item not Found"});
         };
         const updatedItem = await Item.findById(id);
-        res.status(200).json(updatedItem);
+        return res.status(200).json(updatedItem);
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -154,9 +161,9 @@ const updateViews = async(req, res) => {
         item.views += 1
         await Item.findByIdAndUpdate(id, item );
         
-        res.status(200).json(item.views);
+        return res.status(200).json(item.views);
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -170,12 +177,12 @@ const deleteItemById = async (req, res) => {
 
 
         if(item.deletedCount == 0){
-            res.status(404).json({message: "Item not Found"});
+            return res.status(404).json({message: "Item not Found"});
         }else{
-            res.status(200).json({message: "Successfully deleted Item"});
+            return res.status(200).json({message: "Successfully deleted Item"});
         }
     }catch(error){
-        res.status(500).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }
 }
 

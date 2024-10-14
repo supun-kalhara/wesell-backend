@@ -10,6 +10,7 @@ const {
     getUserByUsername,
     deleteUserByEmail,
     updateUserById,
+    savePost,
 } =   require('../controllers/user.controller')
 
 
@@ -30,6 +31,9 @@ router.get('/username/:username', getUserByUsername);
 
 // Register
 router.post('/register', registerUser);
+
+// Save post
+router.post('/save', savePost);
 
 // Update
 router.put('/:id', updateUserById);

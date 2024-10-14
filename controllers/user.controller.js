@@ -65,11 +65,14 @@ const getUserById = async (req, res) => {
     try{
         const { id } = req.params;
         const user = await User.findById(id);
+        if(!user){
+            return res.status(404).json({message: "User not Found"});
+        }
         resUser = user.toJSON()
         delete resUser.password
         return res.status(200).json(resUser);
     }catch(error){
-        return res.status(500).json({message: "User not Found"});
+        return res.status(500).json({message: error.message});
     }
 }
 
@@ -144,6 +147,21 @@ const updateUserById = async (req, res) => {
     }
 }
 
+// Save Post
+const savePost = async(req, res) => {
+    try{
+        const user = await User.findById(req.body.userId);
+        if (!user) {
+            return res.status(404).json({message: "User not Found"});
+        };
+        user.favourites = [...user.favourites, ...[req.body.postId]]
+        await User.findByIdAndUpdate(req.body.userId, user );
+        return res.status(200).json(user.favourites);
+    }catch(error){
+        return res.status(500).json({message: error.message});
+    }
+}
+
 module.exports = {
     registerUser,
     loginUser,
@@ -153,4 +171,5 @@ module.exports = {
     getUserByUsername,
     deleteUserByEmail,
     updateUserById,
+    savePost
 }
