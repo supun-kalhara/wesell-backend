@@ -167,6 +167,17 @@ const updateViews = async(req, res) => {
     }
 }
 
+// Get Items By UserId
+const getItemsByUserId = async(req, res) => {
+    try{
+        const { id } = req.params;
+        const items = await Item.find({user: id});
+        return res.status(200).json(items);
+    }catch(error){
+        return res.status(500).json({message: error.message});
+    }
+}
+
 // Delete Item by Id
 const deleteItemById = async (req, res) => {
     try{
@@ -179,6 +190,37 @@ const deleteItemById = async (req, res) => {
         }else{
             return res.status(200).json({message: "Successfully deleted Item"});
         }
+    }catch(error){
+        return res.status(500).json({message: error.message});
+    }
+}
+
+// Search Items
+const searchItems = async(req, res) => {
+    try{
+        const { limit, skip } = req.params;
+
+        const search = req.body.search;
+        response = await Item.aggregate([
+            {
+              $search: {
+                index: "default",
+                "text": {
+                    query: search,
+                    path: {
+                        wildcard: "*"
+                    }
+                }
+              }
+            },
+            {
+                $limit: parseInt(limit)
+            },
+            {
+                $skip: parseInt(skip)
+            }
+        ]);
+        return res.status(200).json(response);
     }catch(error){
         return res.status(500).json({message: error.message});
     }
@@ -197,4 +239,6 @@ module.exports = {
     uploadPhoto,
     updateViews,
     getAllReports,
+    getItemsByUserId,
+    searchItems,
 }

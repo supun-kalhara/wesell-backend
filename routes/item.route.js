@@ -15,7 +15,9 @@ const {
     getItemsRange, 
     uploadPhoto,
     updateViews,
-    getAllReports
+    getAllReports,
+    getItemsByUserId,
+    searchItems,
 } =   require('../controllers/item.controller')
 
 
@@ -27,6 +29,8 @@ router.post('/upload', upload.single('file'), uploadPhoto);
 router.get('/', getAllItems);
 
 router.get('/:id', getItemById);
+
+router.get('/user/:id', getItemsByUserId);
 
 router.get('/type/:type', getItemsByType);
 
@@ -45,5 +49,7 @@ router.post('/views/:id', updateViews);
 router.put('/:id', updateItemById);
 
 router.delete('/:id', deleteItemById);
+
+router.post('/search/:limit/:skip', searchItems);
 
 module.exports = router;
