@@ -199,25 +199,246 @@ const deleteItemById = async (req, res) => {
 const searchItems = async(req, res) => {
     try{
         const { limit, skip } = req.params;
-
         const search = req.body.search;
-        response = await Item.aggregate([
-            {
-              $search: {
-                index: "default",
-                "text": {
-                    query: search,
-                    path: {
-                        wildcard: "*"
+        const sort = req.body.sort;
+        console.log("type", req.body?.category)
+        console.log("location", req.body?.location)
+        var type = req.body?.category;
+        var location = req.body?.location;
+
+        // Default sort by newest
+        var sortBy = { "createdAt": -1 }
+
+        // Set Sort
+        if(sort == "oldest"){ 
+            sortBy = { "createdAt": 1 }
+        }
+        if(sort == "low"){ 
+            sortBy = { "price": 1 }
+        }
+        if(sort == "high"){ 
+            sortBy = { "price": -1 }
+        }
+
+        const requireType = {
+            "text": {
+                "query": type,
+                "path": "type"
+            }
+        }
+
+        const requireLocation = {
+            "text": {
+                "query": location,
+                "path": "location"
+            }
+        }
+
+        const facet = {
+            "totalData": [
+                { "$match": { }},
+                {"$sort": sortBy
+                },
+                { "$skip": parseInt(skip) },
+                { "$limit": parseInt(limit) },
+                
+            ],
+            "totalCount": [
+                { "$count": "count" }
+            ]
+        }
+
+        // Gotta be a better way to do this
+        //Handle each scenario for possible null values
+        if(search == "" && type && location){
+            const items = await Item.aggregate([
+                {
+                    "$search": {
+                        index: "default",
+                        "compound": {
+                            "must": [requireType, requireLocation]
+                        }
                     }
+                },
+                { 
+                    "$facet": facet
                 }
-              }
-            },
+              ])
+            return res.status(200).json(items);
+        }
+
+        if(search == "" && !type && location){
+            const items = await Item.aggregate([
+                {
+                    "$search": {
+                        index: "default",
+                        "compound": {
+                            "must": [requireLocation]
+                        }
+                    }
+                },
+                { 
+                    "$facet": facet
+                }
+              ])
+            return res.status(200).json(items);
+        }
+
+        if(search == "" && type && !location){
+            const items = await Item.aggregate([
+                {
+                    "$search": {
+                        index: "default",
+                        "compound": {
+                            "must": [requireType]
+                        }
+                    }
+                },
+                { 
+                    "$facet": facet
+                }
+              ])
+            return res.status(200).json(items);
+        }
+
+        if(search == "" && !type && !location){
+            console.log("sorting")
+            const items = await Item.aggregate([
+                { 
+                    "$facet": facet
+                }
+              ])
+            return res.status(200).json(items);
+        }
+
+        if(search.length > 0 && type && location){
+            const items = await Item.aggregate([
+                {
+                    $search: {
+                        
+                        index: "default",
+                        "compound": {
+                            "filter": [{
+                                "text": {
+                                    query: search,
+                                    path: {
+                                        wildcard: "*"
+                                    }
+                                },
+                            }],
+                            "must": [requireType, requireLocation]
+                        }
+                        
+                    }
+                },
+                { 
+                    "$facet": facet
+                }
+            ]);
+            return res.status(200).json(items);
+        }
+
+        if(search.length > 0 && !type && location){
+            const items = await Item.aggregate([
+                {
+                    $search: {
+                        
+                        index: "default",
+                        "compound": {
+                            "filter": [{
+                                "text": {
+                                    query: search,
+                                    path: {
+                                        wildcard: "*"
+                                    }
+                                },
+                            }],
+                            "must": [requireLocation]
+                        }
+                        
+                    }
+                },
+                { 
+                    "$facet": facet
+                }
+            ]);
+            return res.status(200).json(items);
+        }
+
+        if(search.length > 0 && type && !location){
+            const items = await Item.aggregate([
+                {
+                    $search: {
+                        
+                        index: "default",
+                        "compound": {
+                            "filter": [{
+                                "text": {
+                                    query: search,
+                                    path: {
+                                        wildcard: "*"
+                                    }
+                                },
+                            }],
+                            "must": [requireType]
+                        }
+                        
+                    }
+                },
+                { 
+                    "$facet": facet
+                }
+            ]);
+            return res.status(200).json(items);
+        }
+
+        if(search.length > 0 && !type && !location){
+            const items = await Item.aggregate([
+                {
+                    $search: {
+                        
+                        index: "default",
+                        "compound": {
+                            "filter": [{
+                                "text": {
+                                    query: search,
+                                    path: {
+                                        wildcard: "*"
+                                    }
+                                },
+                            }],
+                        }
+                        
+                    }
+                },
+                { 
+                    "$facet": facet
+                }
+            ]);
+            return res.status(200).json(items);
+        }
+        // Query
+        const response = await Item.aggregate([
             {
-                $limit: parseInt(limit)
+                $search: {
+                    
+                    index: "default",
+                    "compound": {
+                        "filter": [{
+                            "text": {
+                                query: search,
+                                path: {
+                                    wildcard: "*"
+                                }
+                            },
+                        }],
+                        "must": [requireType, requireLocation]
+                    }
+                    
+                }
             },
-            {
-                $skip: parseInt(skip)
+            { 
+                "$facet": facet
             }
         ]);
         return res.status(200).json(response);
