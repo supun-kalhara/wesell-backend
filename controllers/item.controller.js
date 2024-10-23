@@ -183,7 +183,6 @@ const deleteItemById = async (req, res) => {
     try{
         const { id } = req.params;
         const item = await Item.findByIdAndDelete(id);
-        console.log("item", item)
 
         if(item.deletedCount == 0){
             return res.status(404).json({message: "Item not Found"});
@@ -201,8 +200,6 @@ const searchItems = async(req, res) => {
         const { limit, skip } = req.params;
         const search = req.body.search;
         const sort = req.body.sort;
-        console.log("type", req.body?.category)
-        console.log("location", req.body?.location)
         var type = req.body?.category;
         var location = req.body?.location;
 
@@ -302,7 +299,6 @@ const searchItems = async(req, res) => {
         }
 
         if(search == "" && !type && !location){
-            console.log("sorting")
             const items = await Item.aggregate([
                 { 
                     "$facet": facet
@@ -323,6 +319,10 @@ const searchItems = async(req, res) => {
                                     query: search,
                                     path: {
                                         wildcard: "*"
+                                    },
+                                    fuzzy: {
+                                        maxEdits: 2,
+                                        prefixLength: 2
                                     }
                                 },
                             }],
@@ -350,6 +350,10 @@ const searchItems = async(req, res) => {
                                     query: search,
                                     path: {
                                         wildcard: "*"
+                                    },
+                                    fuzzy: {
+                                        maxEdits: 2,
+                                        prefixLength: 2
                                     }
                                 },
                             }],
@@ -377,6 +381,10 @@ const searchItems = async(req, res) => {
                                     query: search,
                                     path: {
                                         wildcard: "*"
+                                    },
+                                    fuzzy: {
+                                        maxEdits: 2,
+                                        prefixLength: 2
                                     }
                                 },
                             }],
@@ -404,6 +412,10 @@ const searchItems = async(req, res) => {
                                     query: search,
                                     path: {
                                         wildcard: "*"
+                                    },
+                                    fuzzy: {
+                                        maxEdits: 2,
+                                        prefixLength: 2
                                     }
                                 },
                             }],
@@ -429,6 +441,10 @@ const searchItems = async(req, res) => {
                                 query: search,
                                 path: {
                                     wildcard: "*"
+                                },
+                                fuzzy: {
+                                    maxEdits: 2,
+                                    prefixLength: 2
                                 }
                             },
                         }],
