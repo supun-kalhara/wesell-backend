@@ -1,5 +1,6 @@
 const Item = require('../models/item.model.js');
 const Report = require('../models/report.model.js');
+const moment = require('moment')
 
 require('dotenv').config()
 const { S3Client, PutObjectCommand } =  require('@aws-sdk/client-s3');
@@ -194,6 +195,36 @@ const deleteItemById = async (req, res) => {
     }
 }
 
+// Get Trending Items
+const getTrendingItems = async(req, res) => {
+    try{
+        // Sort by views
+        const sortBy = { 
+            "views": -1,
+        }
+
+        const facet = {
+            "totalData": [
+                { "$match": { 
+                    createdAt: {
+                        // GTE = Greater than or equals to
+                        $gte: new Date(moment().subtract(1, 'months').toISOString())  // Created within the last month
+                    } 
+                }},
+                { "$sort": sortBy },
+                { "$limit": 30 },
+                
+            ]
+        }
+        const items = await Item.aggregate([
+            { "$facet": facet }
+        ])
+        return res.status(200).json(items);
+    }catch(error){
+        return res.status(500).json({message: error.message});
+    }
+}
+
 // Search Items
 const searchItems = async(req, res) => {
     try{
@@ -234,8 +265,7 @@ const searchItems = async(req, res) => {
         const facet = {
             "totalData": [
                 { "$match": { }},
-                {"$sort": sortBy
-                },
+                { "$sort": sortBy },
                 { "$skip": parseInt(skip) },
                 { "$limit": parseInt(limit) },
                 
@@ -300,9 +330,7 @@ const searchItems = async(req, res) => {
 
         if(search == "" && !type && !location){
             const items = await Item.aggregate([
-                { 
-                    "$facet": facet
-                }
+                { "$facet": facet }
               ])
             return res.status(200).json(items);
         }
@@ -478,4 +506,5 @@ module.exports = {
     getAllReports,
     getItemsByUserId,
     searchItems,
+    getTrendingItems,
 }

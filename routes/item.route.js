@@ -18,6 +18,7 @@ const {
     getAllReports,
     getItemsByUserId,
     searchItems,
+    getTrendingItems,
 } =   require('../controllers/item.controller')
 
 
@@ -43,6 +44,8 @@ router.post('/', createItem);
 router.post('/report', createReport);
 
 router.get('/report/all', getAllReports);
+
+router.get('/trending/views', getTrendingItems);
 
 router.post('/views/:id', updateViews);
 
